@@ -1,5 +1,7 @@
 # Mockito
 
+**... EN DESARROLLO ...**
+
 ## Introducción
 
 Mockito es una popular biblioteca de Java diseñada específicamente para la creación de objetos simulados, conocidos como **_"mocks"_**, en el contexto de pruebas unitarias. La principal ventaja de usar _"mocks"_ es la capacidad de **simular el comportamiento de objetos complejos y sus dependencias**, permitiendo a los desarrolladores centrarse en probar la funcionalidad específica de la clase bajo prueba sin preocuparse por el estado o el comportamiento de sus colaboradores.
@@ -26,25 +28,19 @@ En las siguientes secciones, exploraremos en detalle cómo configurar Mockito, c
 
 ## Configuración y dependencias
 
-Para comenzar a usar Mockito en tu proyecto de Java, necesitas añadir las dependencias adecuadas en tu archivo de configuración. En esta sección, te mostraremos cómo hacerlo tanto con Maven como con Gradle. También cubriremos cómo utilizar el BOM de Mockito para una gestión más sencilla de las versiones.
+Para comenzar a usar Mockito en un proyecto de Java, se necesita añadir las dependencias adecuadas en el archivo de configuración.
 
 ### Dependencias para Maven
 
-Si tu proyecto utiliza Maven, añade las dependencias de **Mockito** y **JUnit 5** en tu archivo `pom.xml` de la siguiente manera:
+Si el proyecto utiliza Maven, se añaden las dependencias de **Mockito** y **JUnit 5** en el archivo `pom.xml` de la siguiente manera:
 
 ```xml
 <dependencies>
     <!-- JUnit 5 -->
     <dependency>
         <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-api</artifactId>
-        <version>5.8.2</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-engine</artifactId>
-        <version>5.8.2</version>
+        <artifactId>junit-jupiter</artifactId>
+        <version>5.10.3</version>
         <scope>test</scope>
     </dependency>
 
@@ -52,27 +48,36 @@ Si tu proyecto utiliza Maven, añade las dependencias de **Mockito** y **JUnit 5
     <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>4.0.0</version>
+        <version>5.11.0</version>
         <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-junit-jupiter</artifactId>
-        <version>4.0.0</version>
+        <version>5.11.0</version>
         <scope>test</scope>
     </dependency>
 </dependencies>
 ```
 
-Para simplificar la gestión de versiones y asegurar la compatibilidad entre las diferentes partes de Mockito, puedes utilizar el BOM (Bill of Materials) de Mockito. Añade el BOM en la sección `<dependencyManagement>` de tu archivo `pom.xml`:
+Para simplificar la gestión de versiones y asegurar la compatibilidad entre las diferentes partes de Mockito, se puede utilizar el **BOM (Bill of Materials)** de Mockito y JUnit.
+
+Se añade el BOM en la sección `<dependencyManagement>` del archivo `pom.xml`:
 
 ```xml
 <dependencyManagement>
     <dependencies>
         <dependency>
+            <groupId>org.junit</groupId>
+            <artifactId>junit-bom</artifactId>
+            <version>5.10.3</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-bom</artifactId>
-            <version>4.0.0</version>
+            <version>5.11.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -83,14 +88,7 @@ Para simplificar la gestión de versiones y asegurar la compatibilidad entre las
     <!-- JUnit 5 -->
     <dependency>
         <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-api</artifactId>
-        <version>5.8.2</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-engine</artifactId>
-        <version>5.8.2</version>
+        <artifactId>junit-jupiter</artifactId>
         <scope>test</scope>
     </dependency>
 
@@ -108,52 +106,198 @@ Para simplificar la gestión de versiones y asegurar la compatibilidad entre las
 </dependencies>
 ```
 
-Usar el BOM garantiza que todas las dependencias relacionadas con Mockito usen versiones compatibles entre sí.
+Usar el BOM garantiza que todas las dependencias relacionadas con Mockito y JUnit usen **versiones compatibles entre sí**.
 
 ### Dependencias para Gradle
 
-Si tu proyecto utiliza Gradle, añade las dependencias de **Mockito** y **JUnit 5** en tu archivo `build.gradle` como sigue:
+Si el proyecto utiliza Gradle, añadir las dependencias de **Mockito** y **JUnit 5** en el archivo `build.gradle`:
 
 ```gradle
 dependencies {
     // JUnit 5
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation('org.junit.jupiter:junit-jupiter:5.10.3')
 
     // Mockito
-    testImplementation 'org.mockito:mockito-core:4.0.0'
-    testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0'
+    testImplementation('org.mockito:mockito-core:5.11.0')
+    testImplementation('org.mockito:mockito-junit-jupiter:5.12.0')
 }
 ```
 
-En Gradle, puedes utilizar el BOM de Mockito para manejar las versiones de manera más sencilla. Añade el BOM en la configuración de tu proyecto:
+En Gradle, también se puede utilizar el **BOM (Bill of Materials)** de Mockito y JUnit para manejar las versiones de manera más sencilla.
+
+Se añade el BOM en la configuración del proyecto:
 
 ```gradle
 dependencies {
-    // Importar el BOM de Mockito
-    implementation platform('org.mockito:mockito-bom:4.0.0')
+    // Importar el BOM de Mockito y JUnit
+    testImplementation(platform('org.junit:junit-bom:5.10.3'))
+    testImplementation(platform('org.mockito:mockito-bom:5.12.0'))
 
     // JUnit 5
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation('org.junit.jupiter:junit-jupiter')
 
     // Mockito
-    testImplementation 'org.mockito:mockito-core'
-    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation('org.mockito:mockito-core')
+    testImplementation('org.mockito:mockito-junit-jupiter')
 }
 ```
 
-Utilizando el BOM de Mockito, no necesitas especificar las versiones individuales para `mockito-core` y `mockito-junit-jupiter`, ya que el BOM se encarga de establecer las versiones compatibles automáticamente.
-
-- [Mockito and JUnit 5 – Using ExtendWith - Baeldung](https://www.baeldung.com/mockito-junit-5-extension)
+Utilizando el BOM de Mockito y JUnit, no se necesita especificar las versiones individuales para `mockito-core` y `mockito-junit-jupiter`, ya que el BOM se encarga de establecer las versiones compatibles automáticamente.
 
 ## Creación de Mocks
 
-TODO
+Una de las características principales de Mockito es la capacidad de crear objetos simulados, conocidos como _"mocks"_. Estos _"mocks"_ permiten a los desarrolladores simular el comportamiento de objetos complejos y sus dependencias en un entorno controlado.
+
+La forma más básica de crear un _"mock"_ en Mockito es utilizando el método estático `Mockito.mock()`. Este método toma la clase del objeto que se quiere simular y devuelve una instancia simulada de esa clase.
+
+```java
+// ENTIDAD que se quiere SIMULAR
+public interface Service {
+    String performOperation();
+}
+```
+
+Se crea un _"mock"_ de esta interfaz en un prueba unitaria de la siguiente manera:
+
+```java
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class ServiceTest {
+
+    @Test
+    public void testPerformOperation() {
+        // Crear el mock de la interfaz Service
+        Service mockService = Mockito.mock(Service.class);
+
+        // Definir el comportamiento del mock
+        Mockito.when(mockService.performOperation()).thenReturn("Mocked Response");
+
+        // Utilizar el mock en una prueba
+        String response = mockService.performOperation();
+
+        // Verificar el resultado
+        assertEquals("Mocked Response", response);
+    }
+}
+```
+
+Mockito también proporciona una manera más limpia y concisa de crear _"mock"_ utilizando **anotaciones**. Para esto, se usa la anotación `@Mock` en combinación con **la extensión de JUnit 5**.
+
+Para usar las **anotaciones** hay que configurar la clase de prueba para que use la entensión de Mockito con `@ExtendWith(MockitoExtension.class)`. Una vez configurada, se pueden crear _"mocks"_ con la anotación `@Mock`, lo que facilita la creación de los _"mocks"_ y hace el código más limpio:
+
+```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class ServiceTest {
+
+    @Mock
+    private Service mockService;
+
+    @Test
+    public void testPerformOperation() {
+        // Definir el comportamiento del mock
+        when(mockService.performOperation()).thenReturn("Mocked Response");
+
+        // Utilizar el mock en una prueba
+        String response = mockService.performOperation();
+
+        // Verificar el resultado
+        assertEquals("Mocked Response", response);
+    }
+}
+```
+
+- [Mockito and JUnit 5 – Using ExtendWith - Baeldung](https://www.baeldung.com/mockito-junit-5-extension)
 
 ## Definición de Comportamiento
 
-TODO
+Además de crear los _"mocks"_, hay que **definir cómo deben comportarse** cuando se les llamen ciertos métodos. Esto se hace utilizando los métodos `when().thenReturn()` y `when().thenThrow()` de Mockito.
+
+Sin embargo es importante mencionar una consideración clave: definir el comportamiento de los _"mocks"_ puede llevar a pruebas que **no reflejen fielmente el comportamiento real** de las clases que se están simulando. Esto puede ocurrir si el comportamiento definido en los _"mocks"_ no coincide con la implementación real de las clases.
+
+Por lo tanto, es crucial utilizar esta técnica con cuidado y sólo definir un comportamiento con aquellas entidades que realmente deben ser simuladas en las pruebas como por ejemplo una llamada a una API externa o a una base de datos.
+
+El método `when().thenReturn()` se utiliza para especificar el valor de retorno de un método de un _"mock"_ que simula una clase cuando este método es invocado.
+
+```java
+// ENTIDAD que se quiere SIMULAR
+public interface Service {
+    String performOperation();
+    
+    String performOperationWithArgs(String arg);
+}
+```
+
+En el ejemplo, se define que cuando se invoque el método `mockService.performOperation()` se devolverá la cadena "Mocked Response":
+
+```java
+@Test
+public void testPerformOperation() {
+    // Crear el mock de la interfaz Service
+    Service mockService = Mockito.mock(Service.class);
+
+    // Definir el comportamiento del mock
+    when(mockService.performOperation()).thenReturn("Mocked Response");
+
+    // Utilizar el mock en una prueba
+    String response = mockService.performOperation();
+    
+    // Verificar el resultado
+    assertEquals("Mocked Response", response);
+}
+```
+
+También se puede definir comportamientos de **métodos que aceptan parámetros**:
+
+```java
+@Test
+public void testPerformOperation() {
+    // Crear el mock de la interfaz Service
+    Service mockService = Mockito.mock(Service.class);
+
+    // Definir el comportamiento del mock para diferentes parámetros
+    when(mockService.performOperationWithArgs("input1")).thenReturn("Output1");
+    when(mockService.performOperationWithArgs("input2")).thenReturn("Output2");
+
+    // Utilizar y verificar el resultado
+    assertEquals("Output1", mockService.performOperationWithArgs("input1"));
+    assertEquals("Output2", mockService.performOperationWithArgs("input2"));
+}
+```
+
+El método `when().thenThrow()` se utiliza para especificar que un método de un _"mock"_ debe lanzar una excepción cuando se le llama con ciertos parámetros:
+
+```java
+@Test
+public void testPerformOperation() {
+    // Crear el mock de la interfaz Service
+    Service mockService = Mockito.mock(Service.class);
+
+    // Definir el comportamiento del mock
+    when(mockService.performOperation()).thenThrow(new RuntimeException("Mocked Exception"));
+
+    // Utilizar el mock en una prueba
+    String response = mockService.performOperation();
+    
+    // Verificar el resultado
+    assertEquals("Mocked Response", response);
+}
+```
+
+En el ejemplo, se define que cuando se invoque el método `mockService.performOperation()`, el _"mock"_ lanzará una `RuntimeException` con el mensaje "Mocked Exception".
+
+- [Mockito When/Then Cookbook - Baeldung](https://www.baeldung.com/mockito-behavior)
 
 ## Verificación de Interacciones
 

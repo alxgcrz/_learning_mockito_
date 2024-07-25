@@ -148,7 +148,7 @@ Utilizando el BOM de Mockito y JUnit, no se necesita especificar las versiones i
 
 Una de las características principales de Mockito es la capacidad de crear objetos simulados, conocidos como _"mocks"_. Estos _"mocks"_ permiten a los desarrolladores simular el comportamiento de objetos complejos y sus dependencias en un entorno controlado.
 
-La forma más básica de crear un _"mock"_ en Mockito es utilizando el método estático `Mockito.mock()`. Este método toma la clase del objeto que se quiere simular y devuelve una instancia simulada de esa clase.
+La forma más básica de crear un _"mock"_ en Mockito es utilizando el método estático `Mockito.mock()`. Este método toma la clase del objeto que se quiere simular y devuelve una **instancia simulada de esa clase**.
 
 ```java
 // ENTIDAD que se quiere SIMULAR
@@ -184,41 +184,7 @@ public class ServiceTest {
 }
 ```
 
-Mockito también proporciona una manera más limpia y concisa de crear _"mock"_ utilizando **anotaciones**. Para esto, se usa la anotación `@Mock` en combinación con **la extensión de JUnit 5**.
-
-Para usar las **anotaciones** hay que configurar la clase de prueba para que use la entensión de Mockito con `@ExtendWith(MockitoExtension.class)`. Una vez configurada, se pueden crear _"mocks"_ con la anotación `@Mock`, lo que facilita la creación de los _"mocks"_ y hace el código más limpio:
-
-```java
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
-public class ServiceTest {
-
-    @Mock
-    private Service mockService;
-
-    @Test
-    public void testPerformOperation() {
-        // Definir el comportamiento del mock
-        when(mockService.performOperation()).thenReturn("Mocked Response");
-
-        // Utilizar el mock en una prueba
-        String response = mockService.performOperation();
-
-        // Verificar el resultado
-        assertEquals("Mocked Response", response);
-    }
-}
-```
-
-- [Mockito and JUnit 5 – Using ExtendWith - Baeldung](https://www.baeldung.com/mockito-junit-5-extension)
+Mockito también proporciona una manera más limpia y concisa de crear _"mock"_ utilizando **anotaciones**. Para esto, se usa la anotación [`@Mock`](#mock).
 
 ## Definición de Comportamiento
 
@@ -301,11 +267,271 @@ En el ejemplo, se define que cuando se invoque el método `mockService.performOp
 
 ## Verificación de Interacciones
 
+Una de las capacidades más importantes de Mockito es la posibilidad de **verificar interacciones con los _mocks_**. Esto permite asegurar de que los métodos en los _mocks_ se llaman como se espera durante la ejecución del código.
+
+El método `verify()` se utiliza para **verificar la invocación** de un método en un _mock_ .
+
+```java
+@Test
+public void testPerformOperation() {
+    // Crear el mock de la interfaz Service
+    Service mockService = Mockito.mock(Service.class);
+
+    // Llamar al método en el mock
+    mockService.performOperation();
+
+    // Verificar que el método se ha llamado exactamente una vez
+    verify(mockService).performOperation();
+}
+```
+
+Se puede especificar **el número exacto de veces** que se espera que un método sea llamado utilizando el método `times()`:
+
+```java
+@Test
+public void testPerformOperation() {
+    // Crear el mock de la interfaz Service
+    Service mockService = Mockito.mock(Service.class);
+
+    // Llamar al método en el mock varias veces
+    mockService.performOperation();
+    mockService.performOperation();
+
+    // Verificar que el método se ha llamado exactamente dos veces
+    verify(mockService, times(2)).performOperation();
+}
+```
+
+También se puede verificar que un método en un mock se ha llamado con **ciertos parámetros**:
+
+```java
+@Test
+public void testPerformOperation() {
+    // Crear el mock de la interfaz Service
+    Service mockService = Mockito.mock(Service.class);
+
+    // Llamar al método en el mock con un parámetro específico
+    mockService.performOperationWithArgs("testInput")
+
+    // Verificar que el método se ha llamado con el parámetro "testInput"
+    verify(mockService).performOperationWithArgs("testInput");
+}
+```
+
+Se puede verificar que un método en un _mock_ **nunca se ha llamado** utilizando el método `never()`.
+
+```java
+@Test
+public void testPerformOperation() {
+    // Crear el mock de la interfaz Service
+    Service mockService = Mockito.mock(Service.class);
+
+    // No llamar al método en el mock
+    
+    // Verificar que el método nunca se ha llamado
+    verify(mockService, never()).performOperation();
+}
+```
+
+- [Mockito Verify Cookbook - Baeldung](https://www.baeldung.com/mockito-verify)
+
+## Anotaciones en Mockito
+
+Hay diferentes formas de **habilitar las anotaciones** con pruebas en Mockito.
+
+La forma recomendable sería anotar la prueba JUnit con `@ExtendWith(MockitoExtension.class)`. En ese caso hay que importar la dependencia `mockito-junit-jupiter` con Maven o Gradle para poder hacer uso de `MockitoJUnitRunner`:
+
+```java
+@ExtendWith(MockitoExtension.class)
+public class MockitoAnnotationUnitTest {
+    // ...
+}
+```
+
+De forma alternativa, se puede habilitar las anotaciones de Mockito mediante programación invocando el método `MockitoAnnotations.openMocks()`:
+
+```java
+@BeforeEach
+public void init() {
+    MockitoAnnotations.openMocks(this);
+}
+```
+
+Finalmente, se puede utilizar `MockitoJUnit.rule()`:
+
+```java
+public class MockitoAnnotationsInitWithMockitoJUnitRuleUnitTest {
+
+    @Rule
+    public MockitoRule initRule = MockitoJUnit.rule();
+
+    ...
+}
+```
+
+- [Mockito and JUnit 5 – Using ExtendWith - Baeldung](https://www.baeldung.com/mockito-junit-5-extension)
+
+### @Mock
+
+Una vez habilitadas las anotaciones, se pueden crear e inyectar _"mocks"_ con la anotación `@Mock`, lo que facilita la creación y hace el código más limpio y compacto al no tener que invocar `Mockito.mock(...)` de forma manual:
+
+```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class ServiceTest {
+
+    @Mock
+    private Service mockService;
+
+    @Test
+    public void testPerformOperation() {
+        // Definir el comportamiento del mock
+        when(mockService.performOperation()).thenReturn("Mocked Response");
+
+        // Utilizar el mock en una prueba
+        String response = mockService.performOperation();
+
+        // Verificar el resultado
+        assertEquals("Mocked Response", response);
+    }
+}
+```
+
+### @InjectMocks
+
+Una característica poderosa de Mockito es la capacidad de inyectar _mocks_ en la clase bajo prueba utilizando la anotación `@InjectMocks`. Esto simplifica la configuración de las pruebas al manejar automáticamente la creación y la inyección de los mocks en los campos de la clase que se está probando.
+
+La anotación `@InjectMocks` se utiliza para crear una instancia de la clase bajo prueba y automáticamente inyectar los _mocks_ en sus dependencias. Esta anotación facilita la configuración de las pruebas al evitar la necesidad de crear manualmente la instancia de la clase y configurar sus dependencias.
+
+```java
+// Modelo del dominio
+public class User {
+    private String name;
+
+    public User(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+}
+```
+
+```java
+// Repository
+public interface UserRepository {
+    User findUserByName(String name);
+}
+```
+
+```java
+// Servicio que utiliza 'UserRepository'
+public class UserService {
+
+    private UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public User getUserByName(String name) {
+        return userRepository.findUserByName(name);
+    }
+
+}
+```
+
+```java
+package com.example.project;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class UserServiceTest {
+
+    // Crear un mock de 'UserRepository'
+    @Mock
+    private UserRepository userRepository;
+
+    // Crea un instancia de 'UserService' y se inyecta el mock de 'UserRepository'
+    @InjectMocks
+    private UserService userService;
+
+    @Test
+    public void testGetUserByName() {
+        // Definir el comportamiento del mock
+        User mockUser = new User("John Doe");
+        when(userRepository.findUserByName("John Doe")).thenReturn(mockUser);
+
+        // Llamar al método en la clase bajo prueba
+        User user = userService.getUserByName("John Doe");
+
+        // Verificar que el método en el mock se haya llamado correctamente
+        verify(userRepository).findUserByName("John Doe");
+
+        // Verificar el resultado
+        assertEquals("John Doe", user.getName());
+    }
+
+}
+```
+
+Además de la inyección de dependencias en el constructor, `@InjectMocks` también puede inyectar dependencias en campos y métodos _'setter'_.
+
+```java
+// Servicio
+public class UserService {
+
+    private UserRepository userRepository;
+
+    // Constructor sin parámetros. No se realiza la inyección aquí
+    public UserService() { }
+
+    // Inyección en el método setter
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public User getUserByName(String name) {
+        return userRepository.findUserByName(name);
+    }
+
+}
+```
+
+### @Captor
+
+La anotación `@Captor` en Mockito se utiliza para capturar los argumentos pasados a los métodos de los _mocks_. Esto es útil cuando se quiere verificar no solo que un método se llamó, sino también que se llamó con los argumentos correctos.
+
+La anotación `@Captor` declara y crea instancias de `ArgumentCaptor`. Un `ArgumentCaptor` permite capturar los argumentos que se pasan a los métodos de los _mocks_, lo que facilita la validación de estos argumentos en tus pruebas unitarias.
+
 TODO
 
-## Anotaciones de Mockito
+### @Spy
 
 TODO
+
+- [Getting Started with Mockito @Mock, @Spy, @Captor and @InjectMocks - Baeldung](https://www.baeldung.com/mockito-annotations)
 
 ## Argument Matchers
 

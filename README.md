@@ -186,6 +186,8 @@ public class ServiceTest {
 
 Mockito también proporciona una manera más limpia y concisa de crear _"mock"_ utilizando **anotaciones**. Para esto, se usa la anotación [`@Mock`](#mock).
 
+- [Mockito’s Mock Methods - Baeldung](https://www.baeldung.com/mockito-mock-methods)
+
 ## Definición de Comportamiento
 
 Además de crear los _"mocks"_, hay que **definir cómo deben comportarse** cuando se les llamen ciertos métodos. Esto se hace utilizando los métodos `when().thenReturn()` y `when().thenThrow()` de Mockito.
@@ -242,6 +244,32 @@ public void testPerformOperation() {
 }
 ```
 
+Se puede definir diferentes comportamientos para múltiples llamadas consecutivas al mismo método **encadenando llamadas** a `thenReturn()` seguido de más valores:
+
+```java
+@ExtendWith(MockitoExtension.class)
+public class CountServiceTest {
+
+    @Mock
+    private List<String> mockList;
+
+    @Test
+    public void testGetSizeConsecutiveCalls() {
+        // Configurar el comportamiento del mock para devolver valores diferentes en llamadas consecutivas
+        when(mockList.size()).thenReturn(1).thenReturn(2).thenReturn(3);
+
+        // Añadir elementos a la lista
+        mockList.add("Element1");
+        mockList.add("Element2");
+
+        // Verificar el tamaño en llamadas consecutivas
+        assertEquals(1, mockList.size()); // Primera llamada
+        assertEquals(2, mockList.size()); // Segunda llamada
+        assertEquals(3, mockList.size()); // Tercera llamada
+    }
+}
+```
+
 El método `when().thenThrow()` se utiliza para especificar que un método de un _"mock"_ debe lanzar una excepción cuando se le llama con ciertos parámetros:
 
 ```java
@@ -263,13 +291,17 @@ public void testPerformOperation() {
 
 En el ejemplo, se define que cuando se invoque el método `mockService.performOperation()`, el _"mock"_ lanzará una `RuntimeException` con el mensaje "Mocked Exception".
 
+Para **métodos void**, no puede utilizar `when().thenReturn()` ya que no devuelven ningún valor. En su lugar, puedes usar `doThrow()`, `doAnswer()`, `doNothing()`, etc.
+
 - [Mockito When/Then Cookbook - Baeldung](https://www.baeldung.com/mockito-behavior)
+
+- [The Difference Between doAnswer() and thenReturn() in Mockito - Baeldung](https://www.baeldung.com/mockito-doanswer-thenreturn)
 
 ## Verificación de Interacciones
 
 Una de las capacidades más importantes de Mockito es la posibilidad de **verificar interacciones con los _mocks_**. Esto permite asegurar de que los métodos en los _mocks_ se llaman como se espera durante la ejecución del código.
 
-El método `verify()` se utiliza para **verificar la invocación** de un método en un _mock_ .
+El método `verify()` se utiliza para **verificar la invocación** de un método en un _mock_:
 
 ```java
 @Test
@@ -285,7 +317,7 @@ public void testPerformOperation() {
 }
 ```
 
-Se puede especificar **el número exacto de veces** que se espera que un método sea llamado utilizando el método `times()`:
+Se puede especificar **el número exacto de veces** que se espera que un método sea llamado utilizando el método `times()`. También se puede usar `atLeast()`, y `atMost()` para especificar la cantidad de llamadas esperadas:
 
 ```java
 @Test
@@ -333,6 +365,54 @@ public void testPerformOperation() {
 }
 ```
 
+Para verificar que los métodos se han llamado en un orden específico, utilizamos la clase `InOrder`:
+
+```java
+import static org.mockito.Mockito.*;
+
+public class NotificationServiceTest {
+
+    // ... setup y otros métodos
+
+    @Test
+    public void testNotifyUserCallsSendInOrder() {
+        notificationService.notifyUser("Message 1");
+        notificationService.notifyUser("Message 2");
+
+        InOrder inOrder = inOrder(mockNotifier);
+
+        // Verificar que send fue llamado primero con "Message 1" y luego con "Message 2"
+        inOrder.verify(mockNotifier).send("Message 1");
+        inOrder.verify(mockNotifier).send("Message 2");
+    }
+}
+```
+
+Para asegurarnos de que no se han hecho más interacciones con un _mock_, usamos `verifyNoMoreInteractions()`. También podemos usar `verifyZeroInteractions()` para asegurarnos de que no hubo ninguna interacción en absoluto.
+
+```java
+import static org.mockito.Mockito.*;
+
+public class NotificationServiceTest {
+
+    // ... setup y otros métodos
+
+    @Test
+    public void testNoMoreInteractions() {
+        notificationService.notifyUser("Message");
+
+        // Verificar que no hubo más interacciones con el mock
+        verifyNoMoreInteractions(mockNotifier);
+    }
+
+    @Test
+    public void testZeroInteractions() {
+        // Verificar que no hubo ninguna interacción con el mock
+        verifyZeroInteractions(mockNotifier);
+    }
+}
+```
+
 - [Mockito Verify Cookbook - Baeldung](https://www.baeldung.com/mockito-verify)
 
 ## Anotaciones en Mockito
@@ -376,15 +456,6 @@ public class MockitoAnnotationsInitWithMockitoJUnitRuleUnitTest {
 Una vez habilitadas las anotaciones, se pueden crear e inyectar _"mocks"_ con la anotación `@Mock`, lo que facilita la creación y hace el código más limpio y compacto al no tener que invocar `Mockito.mock(...)` de forma manual:
 
 ```java
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 public class ServiceTest {
 
@@ -452,20 +523,6 @@ public class UserService {
 ```
 
 ```java
-package com.example.project;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
@@ -525,29 +582,229 @@ La anotación `@Captor` en Mockito se utiliza para capturar los argumentos pasad
 
 La anotación `@Captor` declara y crea instancias de `ArgumentCaptor`. Un `ArgumentCaptor` permite capturar los argumentos que se pasan a los métodos de los _mocks_, lo que facilita la validación de estos argumentos en tus pruebas unitarias.
 
-TODO
+```java
+// Repository
+public interface UserRepository {
+    void sendNotification(User user);
+}
+```
+
+```java
+// Servicio
+public class UserService {
+    private UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public void notifyUser(User user) {
+        userRepository.sendNotification(user);
+    }
+}
+```
+
+```java
+@ExtendWith(MockitoExtension.class)
+public class UserServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private UserService userService;
+
+    @Captor
+    private ArgumentCaptor<User> userCaptor;
+
+    @Test
+    public void testNotifyUser() {
+        User user = new User("John Doe");
+
+        // Llamar al método en la clase bajo prueba
+        userService.notifyUser(user);
+
+        // Capturar el argumento pasado al método sendNotification
+        verify(userRepository).sendNotification(userCaptor.capture());
+
+        // Obtener el valor capturado
+        User capturedUser = userCaptor.getValue();
+
+        // Verificar que el argumento capturado es el esperado
+        assertEquals("John Doe", capturedUser.getName());
+    }
+}
+```
+
+La idea es poder "capturar" los argumentos que se están utilizando para hacer llamadas a métodos dentro de un método. Es decir, el método `userService.notifyUser(user);` es el método visible pero internamente desde ese tipo de métodos se pueden estar haciendo llamadas a otros métodos.
+
+Con `ArgumentCaptor<?>` podemos "capturar" los argumentos utilizados para hacer esas llamadas. En el ejemplo, se "capturan" los argumentos usados en `userRepository.sendNotification(user);` que es el método interno. Sin `ArgumentCaptor<?>` no se podría comprobar como se están usando los argumentos ya que aunque se conoce que argumentos se le están pasando al método más visible, no se sabe que se hace con esos argumentos internamente.
 
 ### @Spy
 
-TODO
+La anotación `@Spy` en Mockito se utiliza para crear un espía (_spy_) de un objeto real. A diferencia de los _mocks_, que son objetos simulados, los espías permiten espiar (o monitorear) las llamadas a un objeto real, al mismo tiempo que se puede configurar su comportamiento.
+
+Un _spy_ en Mockito es un objeto real en el que se pueden espiar los métodos. Permite observar las interacciones con el objeto y, opcionalmente, configurar respuestas personalizadas para ciertos métodos. A diferencia de los _mocks_, que no contienen ningún comportamiento real, los espías mantienen el comportamiento original del objeto, a menos que se especifique lo contrario.
+
+```java
+@ExtendWith(MockitoExtension.class)
+public class SpyExampleTest {
+
+    @Spy
+    private List<String> spyList = new ArrayList<>();
+
+    @Test
+    public void testSpy() {
+        spyList.add("Hello");
+
+        // Verificar que se haya llamado al método add
+        verify(spyList).add("Hello");
+
+        // Verificar que el comportamiento real se mantenga
+        assertEquals(1, spyList.size());
+        assertEquals("Hello", spyList.get(0));
+    }
+}
+```
 
 - [Getting Started with Mockito @Mock, @Spy, @Captor and @InjectMocks - Baeldung](https://www.baeldung.com/mockito-annotations)
 
 ## Argument Matchers
 
-TODO
+`ArgumentMatchers` es una clase de utilidad en Mockito que proporciona **una serie de métodos estáticos** para hacer coincidir argumentos en métodos mockeados. Estos _matchers_ permiten realizar verificaciones y configuraciones más dinámicas en lugar de utilizar valores exactos.
 
-## Simulación de Excepciones
+Mockito proporciona una variedad de matchers que puedes usar para diferentes propósitos:
 
-TODO
+- **`any()`**: Coincide con cualquier valor del tipo especificado.
+  - `anyInt()`: Coincide con cualquier entero (`int`).
+  - `anyDouble()`: Coincide con cualquier valor de punto flotante (`double`).
+  - `anyFloat()`: Coincide con cualquier valor de punto flotante (`float`).
+  - `anyLong()`: Coincide con cualquier valor largo (`long`).
+  - `anyShort()`: Coincide con cualquier valor corto (`short`).
+  - `anyByte()`: Coincide con cualquier valor de byte (`byte`).
+  - `anyChar()`: Coincide con cualquier carácter (`char`).
+  - `anyBoolean()`: Coincide con cualquier valor booleano (`boolean`).
+  - `anyString()`: Coincide con cualquier cadena (`String`).
+  - `anyList()`: Coincide con cualquier lista (`List`).
+  - `anyMap()`: Coincide con cualquier mapa (`Map`).
 
-## Ejemplos Completos
+- **`eq()`**: Coincide con un valor específico.
+  - `eq(5)`: Coincide con el valor entero 5.
+  - `eq("Test")`: Coincide con la cadena "Test".
 
-TODO
+- **`isNull()`**: Coincide con valores `null`.
 
-## Resumen y Buenas Prácticas
+- **`isNotNull()`**: Coincide con cualquier valor no `null`.
 
-TODO
+- **`argThat()`**: Permite utilizar una expresión lambda o un predicado para hacer coincidir argumentos que cumplen con una condición específica.
+  - `argThat(value -> value.length() > 5)`: Coincide con argumentos que cumplen con la condición proporcionada.
+
+- **`contains()`**: Coincide con cadenas que contienen un valor específico.
+
+- **`startsWith()`**: Coincide con cadenas que comienzan con un valor específico.
+
+- **`endsWith()`**: Coincide con cadenas que terminan con un valor específico.
+
+En este ejemplo se usa `anyInt()` para indicar qué debe devolver el _mock_ para cualquier entero como argumento:
+
+```java
+@ExtendWith(MockitoExtension.class)
+public class MyServiceTest {
+
+    @Mock
+    private MyService myService;
+
+    @Test
+    public void testServiceMethod() {
+        // Configurar el mock para devolver un valor cuando se llama con cualquier entero
+        when(myService.doSomething(anyInt())).thenReturn("Result");
+
+        String result = myService.doSomething(123);
+
+        assertEquals("Result", result);
+    }
+}
+```
+
+Los _matchers_ también se utilizan para **verificar** que los métodos fueron llamados con ciertos argumentos:
+
+```java
+@ExtendWith(MockitoExtension.class)
+public class MyServiceTest {
+
+    @Mock
+    private MyService myService;
+
+    @Test
+    public void testVerifyMethodCall() {
+        myService.doSomething(123);
+
+        // Verificar que el método fue llamado con cualquier entero
+        verify(myService).doSomething(anyInt());
+    }
+}
+```
+
+Además, se pueden crear **_matchers_ personalizados** usando `argThat()` para especificar condiciones más complejas:
+
+```java
+@ExtendWith(MockitoExtension.class)
+public class CustomMatcherTest {
+
+    @Mock
+    private MyService myService;
+
+    @Test
+    public void testCustomMatcher() {
+        when(myService.process(argThat(value -> value.length() > 5)))
+            .thenReturn("Long String");
+
+        String result = myService.process("HelloWorld");
+
+        assertEquals("Long String", result);
+    }
+}
+```
+
+- [Mockito ArgumentMatchers - Baeldung](https://www.baeldung.com/mockito-argument-matchers)
+
+## Buenas Prácticas
+
+Estas prácticas incluyen la gestión adecuada de mocks, la claridad en las pruebas, y cómo evitar problemas comunes.
+
+### Mantener las pruebas simples y claras
+
+La claridad en las pruebas es esencial para mantener la calidad del código y facilitar la comprensión.
+
+Cada prueba debe ser **independiente de las demás**. Hay que asegurarse de que la configuración de un test no afecte a otros tests.
+
+Utilizar **nombres descriptivos** para los métodos de prueba que indiquen claramente qué aspecto del comportamiento se está probando.
+
+Configura solo los _mocks_ y _stubs_ que sean **necesarios para la prueba**. Evitar configurar comportamientos innecesarios que no aporten a la verificación.
+
+### No abusar de los _mocks_
+
+Utilizar mocks es útil, pero el abuso de ellos puede llevar a pruebas frágiles.
+
+Evitar crear _mocks_ para cada dependencia de una clase. En su lugar, considerar el uso de objetos reales o `@Spy` para dependencias complejas.
+
+No configurar _mocks_ para **comportamientos extremadamente complejos**. En su lugar, considerar simplificar el diseño del código.
+
+### Usar `@InjectMocks` con precaución
+
+La anotación `@InjectMocks` es potente, pero puede hacer que las pruebas sean menos predecibles si no se usa correctamente.
+
+**Controlar la inyección** asegurándose de que la clase que se está probando tenga un estado consistente después de la inyección de mocks.
+
+Si una clase tiene **demasiadas dependencias**, considera refactorizar para hacer la clase más modular y fácil de probar.
+
+### Verificar las interacciones solo cuando sea necesario
+
+La verificación de interacciones debe ser utilizada para validar que los métodos se llamaron como se esperaba. No es necesario verificar cada llamada; usar esta característica solo cuando **la interacción sea parte del comportamiento esperado**.
+
+### Refactorizar las pruebas regularmente
+
+Al igual que el código de producción, **las pruebas también deben ser mantenidas y refactorizadas**. Revisar y actualizar las pruebas para asegurarse de que siguen siendo relevantes y efectivas a medida que el código evoluciona.
 
 ---
 

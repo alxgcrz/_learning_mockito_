@@ -1,7 +1,5 @@
 # Mockito
 
-**... EN DESARROLLO ...**
-
 ## Introducción
 
 Mockito es una popular biblioteca de Java diseñada específicamente para la creación de objetos simulados, conocidos como **_"mocks"_**, en el contexto de pruebas unitarias. La principal ventaja de usar _"mocks"_ es la capacidad de **simular el comportamiento de objetos complejos y sus dependencias**, permitiendo a los desarrolladores centrarse en probar la funcionalidad específica de la clase bajo prueba sin preocuparse por el estado o el comportamiento de sus colaboradores.
@@ -182,6 +180,13 @@ public class ServiceTest {
         assertEquals("Mocked Response", response);
     }
 }
+```
+
+Desde la **versión 4.10.0**, en lugar de llamar al método `mock(Class)` o `spy(Class)` con un parámetro de clase, ahora se puede llamar al método `mock()` o `spy()` sin parámetros. Mockito detectará automáticamente la clase necesaria solo si se asigna a una variable o campo con tipo explícito:
+
+```java
+Foo foo = Mockito.mock();
+Bar bar = Mockito.spy();
 ```
 
 Mockito también proporciona una manera más limpia y concisa de crear _"mock"_ utilizando **anotaciones**. Para esto, se usa la anotación [`@Mock`](#mock).

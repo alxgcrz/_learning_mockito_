@@ -1,5 +1,7 @@
 # Mockito
 
+> :warning: **DOCUMENTO EN DESARROLLO** :warning:
+
 ## Introducción
 
 Mockito es una popular biblioteca de Java diseñada específicamente para la creación de objetos simulados, conocidos como **_"mocks"_**, en el contexto de pruebas unitarias. La principal ventaja de usar _"mocks"_ es la capacidad de **simular el comportamiento de objetos complejos y sus dependencias**, permitiendo a los desarrolladores centrarse en probar la funcionalidad específica de la clase bajo prueba sin preocuparse por el estado o el comportamiento de sus colaboradores.
@@ -22,7 +24,7 @@ En resumen, Mockito es una herramienta esencial en el arsenal de pruebas unitari
 
 En las siguientes secciones, exploraremos en detalle cómo configurar Mockito, crear y utilizar _"mocks"_, definir comportamientos, verificar interacciones y aplicar las mejores prácticas para maximizar el valor de nuestras pruebas unitarias.
 
-> Sección generada por ChatGPT
+:warning: **Introducción generada por ChatGPT**
 
 ## Configuración y dependencias
 

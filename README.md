@@ -815,7 +815,7 @@ Al igual que el código de producción, **las pruebas también deben ser manteni
 
 ---
 
-## Referencias
+## Enlaces
 
 - <https://site.mockito.org/>
 - <https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html>
